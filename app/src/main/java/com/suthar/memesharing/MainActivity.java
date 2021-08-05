@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,8 +15,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -36,14 +39,19 @@ import com.bumptech.glide.request.target.Target;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
 ImageView ivMeme;
 ProgressBar prBar;
-String MemeUrl = null;
+Button btnShare;
+String MemeUrl =null;
+    OutputStream outputStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +60,75 @@ String MemeUrl = null;
 
         ivMeme = findViewById(R.id.imageView);
         prBar = findViewById(R.id.pbBar);
+        btnShare = findViewById(R.id.btnShare);
 
         ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
         ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},2);
-        //loadMeme();
+        loadMeme();
 
         prBar.setVisibility(View.GONE);
-        saveImageto();
+
+
+        btnShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Log.d("Error:00","Button clicked");
+                /*BitmapDrawable drawable = (BitmapDrawable) ivMeme.getDrawable();
+                Bitmap bitmap = drawable.getBitmap();
+
+                File filepath= Environment.getExternalStorageDirectory();
+                File dir = new File(filepath.getAbsolutePath()+"/Demo/");
+                Log.d("Error:01",dir.getAbsolutePath());
+                dir.mkdir();
+                File file = new File(dir,System.currentTimeMillis()+".jpg");
+
+                try {
+                    Toast.makeText(MainActivity.this,"InSide Try ",Toast.LENGTH_SHORT).show();
+                    outputStream = new FileOutputStream(file);
+                } catch (FileNotFoundException e) {
+                    Log.d("Error:1",e.getMessage());
+                    e.printStackTrace();
+
+                }
+                bitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                Toast.makeText(MainActivity.this,"Saved Successfully "+file.getAbsolutePath(),Toast.LENGTH_LONG).show();
+                try {
+                    outputStream.flush();
+                } catch (IOException e) {
+                    Log.d("Error:2",e.getMessage());
+                    e.printStackTrace();
+                }
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    Log.d("Error:3",e.getMessage());
+                    e.printStackTrace();
+                }
+
+                Intent share = new Intent(Intent.ACTION_SEND);
+                share.setType("image/*");
+                share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                startActivity(Intent.createChooser(share,"Share via"));*/
+
+
+                BitmapDrawable drawable = (BitmapDrawable) ivMeme.getDrawable();
+                Bitmap b = drawable.getBitmap();
+                //Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.refer_pic);
+                Intent share = new Intent(Intent.ACTION_SEND);
+                share.setType("image/*");
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                b.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                String path = MediaStore.Images.Media.insertImage(getContentResolver(),
+                        b, "MEME", "Just A MEME");
+                Uri imageUri = Uri.parse(path);
+                share.putExtra(Intent.EXTRA_STREAM, imageUri);
+                share.putExtra(Intent.EXTRA_TEXT, "Shared via MemeSharing App");
+                startActivity(Intent.createChooser(share, "Share this Meme using"));
+
+            }
+        });
+
     }
 private void loadMeme(){
     //final TextView textView = (TextView) findViewById(R.id.text);
@@ -129,6 +199,8 @@ private void loadMeme(){
 
         Bitmap bitmap = content.getDrawingCache();
         File root = Environment.getExternalStorageDirectory();
+        File dir  = new File(root.getAbsolutePath() + "/Camera/");
+        dir.mkdirs();
         File cachePath = new File(root.getAbsolutePath() + "/Camera/image.jpg");
         Log.d("ImageLocation:",cachePath.getAbsolutePath()+"\n");
         try {
@@ -176,33 +248,5 @@ private void loadMeme(){
     }
 
 
-    private void saveImageto(){
-        BitmapDrawable drawable = (BitmapDrawable) ivMeme.getDrawable();
-        Bitmap bitmap = drawable.getBitmap();
 
-        FileOutputStream outputStream = null;
-        File file = Environment.getExternalStorageDirectory();
-        File dir = new File(file.getAbsolutePath() + "/MyPics");
-        dir.mkdirs();
-
-        String filename =  String.format("%d.png",System.currentTimeMillis());
-
-        File outfile = new File(dir,filename);
-
-        try {
-            outputStream = new FileOutputStream(outfile);
-        }catch (Exception e){
-            Log.d("Error:",e.getMessage());
-        }
-
-        bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);
-
-        try {
-            outputStream.flush();
-            outputStream.close();
-        }catch (Exception e){
-            Log.d("Error:2",e.getMessage());
-        }
-
-    }
 }
