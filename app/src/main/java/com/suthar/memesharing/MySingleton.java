@@ -1,6 +1,8 @@
 package com.suthar.memesharing;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.util.LruCache;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -10,16 +12,16 @@ import com.android.volley.toolbox.Volley;
 public class MySingleton {
     private static MySingleton instance;
     private RequestQueue requestQueue;
+    private ImageLoader imageLoader;
     private static Context ctx;
 
     private MySingleton(Context context) {
         ctx = context;
         requestQueue = getRequestQueue();
 
-
     }
 
-    private static synchronized MySingleton getInstance(Context context) {
+    public static synchronized MySingleton getInstance(Context context) {
         if (instance == null) {
             instance = new MySingleton(context);
         }
@@ -35,9 +37,11 @@ public class MySingleton {
         return requestQueue;
     }
 
-    public   <T> void addToRequestQueue(Request<T> req) {
+    public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
     }
 
-
+    /*public ImageLoader getImageLoader() {
+        return imageLoader;
+    }*/
 }

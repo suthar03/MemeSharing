@@ -135,7 +135,7 @@ private void loadMeme(){
 // ...
 
 // Instantiate the RequestQueue.
-    RequestQueue queue = Volley.newRequestQueue(this);
+
     String url ="https://meme-api.herokuapp.com/gimme";
     prBar.setVisibility(View.VISIBLE);
     JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
@@ -176,7 +176,8 @@ private void loadMeme(){
             });
 
 // Access the RequestQueue through your singleton class.
-    queue.add(jsonObjectRequest);
+    MySingleton.getInstance(MainActivity.this).addToRequestQueue(jsonObjectRequest);
+
 
 }
     public void ShareMeme(View view) {
